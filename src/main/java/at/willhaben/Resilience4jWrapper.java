@@ -4,6 +4,7 @@ package at.willhaben;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.timelimiter.TimeLimiter;
+import io.vavr.control.Try;
 
 import java.time.Duration;
 import java.util.concurrent.Callable;
@@ -17,7 +18,7 @@ public class Resilience4jWrapper {
     private final CircuitBreaker circuitBreaker;
     private final TimeLimiter timeLimiter;
 
-    public Resilience4jWrapper(String param)  {
+    public Resilience4jWrapper(String param) {
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
@@ -32,11 +33,6 @@ public class Resilience4jWrapper {
     }
 
     public Integer run() {
-        try {
-            return callable.call();
-        } catch (Exception e) {
-            System.out.println(circuitBreaker.getMetrics());
-            return -1;
-        }
+        return Try.ofCallable(callable).getOrElse(-1);
     }
 }
